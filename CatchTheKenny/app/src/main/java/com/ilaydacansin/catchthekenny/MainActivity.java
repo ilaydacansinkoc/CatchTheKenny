@@ -18,7 +18,6 @@ public class MainActivity extends AppCompatActivity {
 
     TextView scoreText;
     TextView timeText;
-    TextView tempTimeText;
     ImageView imageView1;
     ImageView imageView2;
     ImageView imageView3;
@@ -31,17 +30,17 @@ public class MainActivity extends AppCompatActivity {
     ImageView[] imgArray;
 
     int score;
-    boolean isStopped;
     Handler handler;
     Runnable runnable;
 
-
-
+    CountDownTimer timer;
+    long milliLeft;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         score = 0;
 
         imageView1 = (ImageView) findViewById(R.id.imageView);
@@ -60,12 +59,20 @@ public class MainActivity extends AppCompatActivity {
         };
 
         hideImages();
+        startTimer(5000);
 
-        new CountDownTimer(5000,1000){
+
+    }
+
+    public void startTimer(long milliTime){
+
+
+        timer = new CountDownTimer(milliTime,1000) {
 
             @Override
             public void onTick(long millisUntilFinished) {
 
+                milliLeft=millisUntilFinished;
                 timeText = (TextView) findViewById(R.id.textTime);
                 timeText.setText("Time "+ millisUntilFinished/1000);
 
@@ -76,14 +83,14 @@ public class MainActivity extends AppCompatActivity {
 
                 timeText = (TextView) findViewById(R.id.textTime);
                 timeText.setText("Time's Up!");
-                for(ImageView imageView: imgArray){
-                    imageView.setEnabled(false);
-                }
-                handler.removeCallbacks(runnable);
-
+                disableImages(false);
 
             }
         }.start();
+    }
+
+    public void resumeTimer(){
+        startTimer(milliLeft);
     }
 
 
@@ -119,28 +126,26 @@ public class MainActivity extends AppCompatActivity {
 
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        for(ImageView imageView: imgArray){
-            imageView.setEnabled(false);
-        }
 
-        handler.removeCallbacks(runnable);
+
+        disableImages(false);
 
 
         alert.setTitle("Game is restarting...");
         alert.setMessage("Are you sure to restart game?");
 
+        timer.cancel();
 
 
         alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(getApplicationContext(),"Game is restarted",Toast.LENGTH_SHORT);
+                Toast.makeText(getApplicationContext(),"Game is restarted",Toast.LENGTH_SHORT).show();
 
                 Intent intent= getIntent();
                 finish();
                 startActivity(intent);
-
             }
         });
 
@@ -148,11 +153,37 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(getApplicationContext(),"Process cancelled",Toast.LENGTH_SHORT);
+                Toast.makeText(getApplicationContext(),"Process cancelled",Toast.LENGTH_SHORT).show();
+                //System.out.println(milliLeft);
+
+
+
+                if(timeText.getText().toString() == "Time's Up"){
+                    disableImages(false);
+                }else{
+                    activateImages(true);
+                    resumeTimer();
+                }
+
+                //System.out.println(milliLeft);
+
             }
         });
 
         alert.show();
 
+    }
+
+    public void disableImages(boolean isEnabled){
+        for(ImageView imageView: imgArray){
+            imageView.setEnabled(isEnabled);
+        }
+        handler.removeCallbacks(runnable);
+    }
+    public void activateImages(boolean isEnabled){
+        for(ImageView imageView: imgArray){
+            imageView.setEnabled(isEnabled);
+        }
+        handler.post(runnable);
     }
 }
