@@ -158,8 +158,10 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-                if(timeText.getText().toString() == "Time's Up"){
+                if(timeText.getText().toString() == "Time's Up!"){
                     disableImages(false);
+                    timer.cancel();
+
                 }else{
                     activateImages(true);
                     resumeTimer();
