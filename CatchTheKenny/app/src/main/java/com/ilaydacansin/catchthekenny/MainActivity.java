@@ -172,6 +172,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        alert.setCancelable(false);
+
         alert.show();
 
     }
